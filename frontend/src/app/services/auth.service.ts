@@ -23,6 +23,7 @@ export interface LoginResponse {
     name: string;
     email: string;
     organizacion: string;
+    role?: string;
   };
 }
 
@@ -31,6 +32,7 @@ export interface Usuario {
   name: string;
   email: string;
   organizacion: any;
+  role?: string;
 }
 
 const TOKEN_KEY = 'jwt_token';
@@ -41,7 +43,7 @@ const API_URL = 'http://localhost:1337';
 })
 export class AuthService {
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router) { }
 
   /**
    * Registra un nuevo usuario. NO genera token.
@@ -60,7 +62,7 @@ export class AuthService {
    */
   refreshToken(): Observable<{ accessToken: string }> {
     return this.http.post<{ accessToken: string }>(`${API_URL}/auth/refresh`, {}, { withCredentials: true }).pipe(
-      tap((res) => {
+      tap((res: { accessToken: string }) => {
         this.saveToken(res.accessToken);
       })
     );
@@ -71,7 +73,7 @@ export class AuthService {
    */
   login(payload: LoginPayload): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${API_URL}/auth/login`, payload, { withCredentials: true }).pipe(
-      tap((res) => {
+      tap((res: LoginResponse) => {
         this.saveToken(res.accessToken);
         this.router.navigate(['/home']);
       })
@@ -87,12 +89,33 @@ export class AuthService {
    * Petición protegida para probar el token (devuelve todos los usuarios).
    */
   getUsuarios(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(`${API_URL}/usuarios`);
+    return this.http.get<Usuario[]>(`${API_URL}/usuarios`, { withCredentials: true });
+  }
+
+  /**
+   * Elimina un usuario (Requiere rol admin)
+   */
+  deleteUsuario(id: string): Observable<any> {
+    return this.http.delete(`${API_URL}/usuarios/${id}`, { withCredentials: true });
   }
 
   /** Obtiene el token del localStorage */
   getToken(): string | null {
     return localStorage.getItem(TOKEN_KEY);
+  }
+
+  /** Obtiene el rol decodificando el token JWT guardado */
+  getRole(): string {
+    const token = this.getToken();
+    if (!token) return 'user';
+    try {
+      // El JWT se compone de 3 partes separadas por puntos. La segunda es el payload en base64.
+      const payloadBase64 = token.split('.')[1];
+      const payloadDecoded = JSON.parse(atob(payloadBase64));
+      return payloadDecoded.role || 'user';
+    } catch (e) {
+      return 'user';
+    }
   }
 
   /** Comprueba si el usuario está autenticado */

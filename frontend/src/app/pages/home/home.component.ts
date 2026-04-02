@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { AuthService, Usuario } from '../../services/auth.service';
 
 @Component({
@@ -14,14 +15,20 @@ export class HomeComponent implements OnInit {
   usuarios: Usuario[] = [];
   loadingUsuarios = false;
   errorUsuarios = '';
+  isAdmin = false;
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) { }
 
   ngOnInit(): void {
     const token = this.authService.getToken() || '';
     // Ahora mostramos el token completo para poder ver los cambios de firma
     this.tokenPreview = token;
+    this.isAdmin = this.authService.getRole() === 'admin';
     console.log('Token actual:', token);
+  }
+
+  goToAdmin(): void {
+    this.router.navigate(['/admin']);
   }
 
   logout(): void {

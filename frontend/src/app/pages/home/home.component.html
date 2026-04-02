@@ -10,7 +10,14 @@
   </div>
 
   <div style="margin: 20px 0;">
-    <h3>Prueba de Token: Lista de Usuarios</h3>
+    <h3>Acceso a Recursos Restringidos</h3>
+
+    <!-- Este botón solo lo verán los admins reales gracias al token JWT local -->
+    <button *ngIf="isAdmin" class="btn" (click)="goToAdmin()"
+      style="margin-right: 10px; background-color: #d32f2f; color: white;">
+      Ir a Panel de Administración
+    </button>
+
     <button class="btn" (click)="cargarUsuarios()" [disabled]="loadingUsuarios" style="margin-right: 10px;">
       <span *ngIf="loadingUsuarios">Cargando...</span>
       <span *ngIf="!loadingUsuarios">Cargar Lista de Usuarios</span>

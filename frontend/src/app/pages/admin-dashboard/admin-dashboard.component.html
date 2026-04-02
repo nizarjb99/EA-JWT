@@ -1,0 +1,31 @@
+<div class="admin-container">
+  <h2>Centro de Administración (Solo Admins) 🛡️</h2>
+  <p>Desde aquí tienes poder absoluto para gestionar a los usuarios.</p>
+
+  <div *ngIf="error" class="error-msg">
+    {{ error }}
+  </div>
+
+  <div *ngIf="loading">Cargando la base de datos de usuarios...</div>
+
+  <table *ngIf="!loading && usuarios.length > 0">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Rol en Sistema</th>
+        <th>Acción Crítica</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of usuarios">
+        <td>{{ u.name }}</td>
+        <td>{{ u.email }}</td>
+        <td [ngClass]="{'is-admin': u.role === 'admin'}">{{ u.role || 'user' | uppercase }}</td>
+        <td>
+          <button class="delete-btn" (click)="eliminarUsuario(u._id)">Expulsar / Borrar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
